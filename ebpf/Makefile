@@ -9,4 +9,3 @@ CC := gcc
 LIBBPF_DIR = ../libbpf/src/
 
 include ./common.mk
-#COMMON_OBJS := $(COMMON_DIR)/common_params.o

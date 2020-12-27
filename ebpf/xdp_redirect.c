@@ -170,11 +170,11 @@ static __always_inline int process_packet(struct xdp_md *ctx, __u64 off)
     pkt.src = iph->saddr;
     pkt.dst = iph->daddr;
 
-    /* obtain port numbers for UDP and TCP traffic */
     if (protocol != IPPROTO_UDP) {
         return XDP_PASS;
     }
 
+    /* obtain port numbers for UDP */
     if (!parse_udp(data, off, data_end, &pkt)) {
         bpf_printk("packet was dropped due to invalid udp packet");
         return XDP_DROP;

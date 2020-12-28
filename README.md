@@ -45,13 +45,13 @@ You can load ebpf program via the iproute2 command. I provide simple scripts to 
 running following command in the root directory of the repository to load the ebpf program to device `virbr0`:
 
 ```shell
-sudo sbin/load.sh virbr0
+$ sudo sbin/load.sh virbr0
 ```
 
 When the demonstration has finished, using the following command to detach the ebpf program
 
 ```shell
-sudo sbin/unload.sh virbr0
+$ sudo sbin/unload.sh virbr0
 ```
 
 ### Start the web server
@@ -59,19 +59,19 @@ sudo sbin/unload.sh virbr0
 After building web server, the executable is placed in `bin/` directory. You can start it via the following command:
 
 ```shell
-nohup sudo bin/xdplbmgmt &
+$ nohup sudo bin/xdplbmgmt &
 ```
 The server listens on `9091` port by default. You can change the listening address via `--address` parameter. For example:
 
 ```shell
-nohup sudo bin/xdplbmgmt --address :9093
+$ nohup sudo bin/xdplbmgmt --address :9093
 ```
 The web server will listen 9093 port on all interfaces
 
 After demonstration has finished, stop web server via:
 
 ```shell
-sudo killall xdplbmgmt
+$ sudo killall xdplbmgmt
 ```
 
 ### Start a container to accept redirected packets
@@ -79,13 +79,13 @@ sudo killall xdplbmgmt
 A helper container is dedicated to accepting redirected packets. Starting a container listen 7999 port of UDP via the following command
 
 ```shell
-docker run --name udpserver --rm -it nicolaka/netshoot  nc -kul 172.17.0.2 7999 
+$ docker run --name udpserver --rm -it nicolaka/netshoot  nc -kul 172.17.0.2 7999 
 ```
 
 Checking the IP and MAC address of the container's `eth0` interface  
 
 ```shell
-> docker exec udpserver ip a show dev eth0 
+$ docker exec udpserver ip a show dev eth0 
 24: eth0@if25: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default
     link/ether 02:42:ac:11:00:02 brd ff:ff:ff:ff:ff:ff link-netnsid 0
     inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0
@@ -95,7 +95,7 @@ You may notice the IP address is: `172.17.0.2` and MAC address is: `02:42:ac:11:
 
 After the demonstration finished, stop the container via:
 ```shell
-docker stop udpserver
+$ docker stop udpserver
 ```
 
 Except for interface `eth0` address in the container, you need to check the interface index of veth pair against `eth0`
@@ -132,7 +132,7 @@ As you has got IP and MAC address of the container and interface index of the ve
 The following command help you configuring rules
 
 ```shell
-curl -v -XPOST \
+$ curl -v -XPOST \
   -d '[{"server": "172.17.0.2", "mac": "02:42:ac:11:00:02", "ifindex": 25}]' \
   -H "Content-Type: application/json" \
   http://127.0.0.1:9091/rules\?sourceAddr\=[virtual machine address]
@@ -145,7 +145,7 @@ curl -v -XPOST \
 The web server provides `GET /rules` interface to observe packet redirecting statistics, the following pieces of script will help you 
 
 ```shell
-while true
+$ while true
 do
 sleep 1
 clear && curl localhost:9091/rules 2>/dev/null |jq --color-output
@@ -173,7 +173,7 @@ When packets are redirected, values of the `forward_bytes` and `forward_packages
 - Using following command to begin to sending UDP packet to an unreachable address 
 
 ```shell
-> nc -u 11.22.33.44.55 7999
+$ nc -u 11.22.33.44.55 7999
 hello ebpf 
 
 ```

@@ -97,3 +97,84 @@ After the demonstration finished, stop the container via:
 ```shell
 docker stop udpserver
 ```
+
+Except for interface `eth0` address in the container, you need to check the interface index of veth pair against `eth0`
+
+Running `ip a` on host, the last item of interfaces should be the another interface of `veth` pair. the output of `ip a` command should like below:
+```
+....
+21: vnet0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master virbr0 state UNKNOWN group default qlen 1000
+    link/ether 52:5d:6a:08:42:32 brd ff:ff:ff:ff:ff:ff
+    inet6 fe80::505d:6aff:fe08:4232/64 scope link
+       valid_lft forever preferred_lft forever
+25: vethea881ef@if24: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue master docker0 state UP group default
+    link/ether ee:1d:d4:fd:50:55 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet6 fe80::ec1d:d4ff:fefd:5055/64 scope link
+       valid_lft forever preferred_lft forever
+```
+`25` is the interface index of veth pair
+
+The value of the following table will be configured in the eBPF map via the web server
+
+| Item | Value|
+|-|-|
+| IP address of the container | 172.17.0.2|
+| MAC address of the container | 02:42:ac:11:00:02|
+| Interface index of veth pair | 25 | 
+
+### Configuring the redirecting rules
+
+The `POST /rules` interface of the web server is used to configured the redirecting rule in the eBPF map.
+
+As you has got IP and MAC address of the container and interface index of the veth pair, you can send a request to `POST /rules` of webserver.
+
+The following command help you configuring rules
+
+```shell
+curl -v -XPOST \
+  -d '[{"server": "172.17.0.2", "mac": "02:42:ac:11:00:02", "ifindex": 25}]' \
+  -H "Content-Type: application/json" \
+  http://127.0.0.1:9091/rules\?sourceAddr\=[virtual machine address]
+```
+
+### Redirecting packets
+
+#### Observe packets redirecting statistics
+
+The web server provides `GET /rules` interface to observe packet redirecting statistics, the following pieces of script will help you 
+
+```shell
+while true
+do
+sleep 1
+clear && curl localhost:9091/rules 2>/dev/null |jq --color-output
+done
+```
+
+The outputs of the script will be refresh periodically.
+
+```json
+[
+  {
+    "server": "172.17.0.2",
+    "mac": "02:42:ac:11:00:02",
+    "ifindex": 25,
+    "forward_bytes": 0,
+    "forward_packages": 0
+  }
+]
+```
+When packets are redirected, values of the `forward_bytes` and `forward_packages` will be changed.
+
+#### Redirecting packets
+
+- Start the virtual machine and login into it via ssh. 
+- Using following command to begin to sending UDP packet to an unreachable address 
+
+```shell
+> nc -u 11.22.33.44.55 7999
+hello ebpf 
+
+```
+You may notice that `hello ebpf` will be display in console of the docker container, and the values of `forward_bytes` and `forward_packages` of observing script will be changed also.
+

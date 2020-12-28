@@ -11,10 +11,6 @@ import (
 	"zhaokun.org/xdp-lb/pkg/lbmap"
 )
 
-const (
-	mapName = "/sys/fs/bpf/xdp/globals/servers"
-)
-
 func init() {
 	logger := gokitlog.NewLogfmtLogger(gokitlog.NewSyncWriter(os.Stderr))
 	logger = gokitlog.With(logger, "ts", gokitlog.DefaultTimestampUTC, "caller", gokitlog.DefaultCaller)
@@ -34,16 +30,16 @@ type server struct {
 
 func (s *server) run() <-chan error {
 	mapper := lbmap.New()
-	err := mapper.Load(mapName)
+	err := mapper.Load(s.mapName)
 	if err != nil {
 		c := make(chan error)
 		go func() <-chan error {
-			c <- fmt.Errorf("load mapper for %s error :%s", mapName, err)
+			c <- fmt.Errorf("load mapper for %s error :%s", s.mapName, err)
 			return c
 		}()
 		return c
 	}
-	redirectRule := controller.NewRedirectRule(mapper, ":9091")
+	redirectRule := controller.NewRedirectRule(mapper, s.addr)
 	return redirectRule.Run()
 }
 

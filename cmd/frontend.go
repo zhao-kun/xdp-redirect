@@ -43,8 +43,8 @@ func (s *server) run() <-chan error {
 		}()
 		return c
 	}
-	lbRule := controller.NewLBRule(mapper, ":9091")
-	return lbRule.Run()
+	redirectRule := controller.NewRedirectRule(mapper, ":9091")
+	return redirectRule.Run()
 }
 
 func parseFlag() *server {

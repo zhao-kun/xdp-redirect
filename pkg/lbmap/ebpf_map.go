@@ -20,8 +20,8 @@ var (
 )
 
 type (
-	// LoadBalanceMap is a bpf map for golang to accessing
-	LoadBalanceMap struct {
+	// RedirectMetaMap is a bpf map for golang to accessing
+	RedirectMetaMap struct {
 		SourceAddr uint32
 		DestAddr   uint32
 		Bytes      uint64
@@ -38,9 +38,9 @@ type (
 		Ifindex    uint16
 	}
 
-	// LoadBalanceBPFMapper provides methods to operation bpf mapper of xdp_lb
-	LoadBalanceBPFMapper interface {
-		Get() ([]LoadBalanceMap, error)
+	// RedirectMetaBPFMapper provides methods to operation bpf mapper of xdp_lb
+	RedirectMetaBPFMapper interface {
+		Get() ([]RedirectMetaMap, error)
 		Set(servers []BackendServer) error
 		Load(name string) error
 	}
@@ -52,7 +52,7 @@ type (
 )
 
 // New create a LoadBalanceBPFMapper object
-func New() LoadBalanceBPFMapper {
+func New() RedirectMetaBPFMapper {
 	return &bpfMapper{}
 }
 
@@ -68,14 +68,14 @@ func (m *bpfMapper) Load(name string) (err error) {
 	return nil
 }
 
-func (m *bpfMapper) Get() ([]LoadBalanceMap, error) {
+func (m *bpfMapper) Get() ([]RedirectMetaMap, error) {
 	if m.bpfMap == nil {
 		return nil, ErrNoLoadPinnedMap
 	}
 	var i uint32 = 0
-	var results []LoadBalanceMap
+	var results []RedirectMetaMap
 	for ; i < maxEntries; i++ {
-		var lb LoadBalanceMap
+		var lb RedirectMetaMap
 		err := m.bpfMap.Lookup(i, &lb)
 		if err != nil {
 			return nil, errors.Wrapf(err, "lookup map of key %d", i)
@@ -104,7 +104,7 @@ func (m *bpfMapper) Set(servers []BackendServer) error {
 			return errors.Wrapf(err, "Invalid mac %s address, convert error", servers[j].Mac)
 		}
 
-		var lb LoadBalanceMap = LoadBalanceMap{
+		var lb RedirectMetaMap = RedirectMetaMap{
 			SourceAddr: saddr,
 			DestAddr:   daddr,
 			Bytes:      0,

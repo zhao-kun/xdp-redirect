@@ -12,13 +12,13 @@ import (
 )
 
 type (
-	// LBRule provides methods to operate ebpf map from the HTTP server
-	LBRule interface {
+	// RedirectRule provides methods to operate ebpf map from the HTTP server
+	RedirectRule interface {
 		Run() <-chan error
 	}
 
 	lbRule struct {
-		mapper lbmap.LoadBalanceBPFMapper
+		mapper lbmap.RedirectMetaBPFMapper
 		router *httprouter.Router
 		addr   string
 	}
@@ -42,15 +42,15 @@ type (
 	}
 )
 
-// NewLBRule create a LBRule object
-func NewLBRule(mapper lbmap.LoadBalanceBPFMapper,
-	addr string) LBRule {
+// NewRedirectRule create a RedirectRule object
+func NewRedirectRule(mapper lbmap.RedirectMetaBPFMapper,
+	addr string) RedirectRule {
 	return &lbRule{mapper, httprouter.New(), addr}
 }
 
 func (l *lbRule) Run() <-chan error {
 	l.router.GET("/rules", adapter(l.getRuleStatistics))
-	l.router.POST("/rules", adapter(l.updateLBRules))
+	l.router.POST("/rules", adapter(l.updateRedirectRules))
 	c := make(chan error)
 	func() {
 		c <- http.ListenAndServe(l.addr, l.router)
@@ -76,7 +76,7 @@ func adapter(f func(*http.Request, httprouter.Params) (interface{}, error)) http
 	}
 }
 
-func (l *lbRule) updateLBRules(request *http.Request, params httprouter.Params) (interface{}, error) {
+func (l *lbRule) updateRedirectRules(request *http.Request, params httprouter.Params) (interface{}, error) {
 	request.ParseForm()
 	sourceAddr := request.Form.Get("sourceAddr")
 	if sourceAddr == "" {

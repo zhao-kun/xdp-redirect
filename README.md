@@ -100,7 +100,8 @@ docker stop udpserver
 
 Except for interface `eth0` address in the container, you need to check the interface index of veth pair against `eth0`
 
-Running `ip a` on host, the last item of interfaces should be the another interface of `veth` pair. the output of `ip a` command should like below:
+Running `ip a` on the host, the last item of interfaces should be another interface of `veth` pair. the output of the `IP a` command should like below:
+
 ```
 ....
 21: vnet0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel master virbr0 state UNKNOWN group default qlen 1000

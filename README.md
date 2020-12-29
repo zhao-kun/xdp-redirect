@@ -127,9 +127,9 @@ The value of the following table will be configured in the eBPF map via the web 
 
 The `POST /rules` interface of the web server is used to configured the redirecting rule in the eBPF map.
 
-As you has got IP and MAC address of the container and interface index of the veth pair, you can send a request to `POST /rules` of webserver.
+As you have got the IP and MAC address of the container and interface index of the veth pair, you can send a request to `POST /rules` of the web server.
 
-The following command help you configuring rules
+The following command helps you configuring rules
 
 ```shell
 $ curl -v -XPOST \
@@ -142,7 +142,7 @@ $ curl -v -XPOST \
 
 #### Observe packets redirecting statistics
 
-The web server provides `GET /rules` interface to observe packet redirecting statistics, the following pieces of script will help you 
+The web server provides `GET /rules` interface to observe packet redirecting statistics, the following pieces of script will help you accessing `GET /rules` API periodically
 
 ```shell
 $ while true
@@ -152,8 +152,7 @@ clear && curl localhost:9091/rules 2>/dev/null |jq --color-output
 done
 ```
 
-The outputs of the script will be refresh periodically.
-
+The JSON outputs of the script will be refreshed periodically.
 ```json
 [
   {
@@ -170,12 +169,12 @@ When packets are redirected, values of the `forward_bytes` and `forward_packages
 #### Redirecting packets
 
 - Start the virtual machine and login into it via ssh. 
-- Using following command to begin to sending UDP packet to an unreachable address 
+- Using the following command to begin sending UDP packet to an unreachable address
 
 ```shell
 $ nc -u 11.22.33.44.55 7999
 hello ebpf 
 
 ```
-You may notice that `hello ebpf` will be display in console of the docker container, and the values of `forward_bytes` and `forward_packages` of observing script will be changed also.
+You may notice that `hello ebpf` will be displayed in the console of the docker container, and the values of `forward_bytes` and `forward_packages` of the observing script will be changed also.
 

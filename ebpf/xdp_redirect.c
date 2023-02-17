@@ -43,6 +43,7 @@ struct pkt_meta {
     };
 };
 
+#pragma pack(push, 1)
 struct dest_info {
     __u32 saddr;
     __u32 daddr;
@@ -51,6 +52,7 @@ struct dest_info {
     __u8 dmac[6];
     __u16 ifindex;
 };
+#pragma pack(pop)
 
 struct bpf_elf_map SEC("maps") servers = {
     .type = BPF_MAP_TYPE_HASH,
